@@ -1,10 +1,9 @@
-
 pipeline {
     agent any
 
     environment {
         // Ensure npm, Docker, and kubectl are accessible in the PATH
-        PATH = "/usr/local/bin:$PATH"  
+        PATH = "/usr/local/bin:$PATH"
     }
 
     stages {
@@ -41,9 +40,9 @@ pipeline {
                 // Log in to DockerHub and push the image
                 withCredentials([string(credentialsId: 'dockerhub-password', variable: 'DOCKER_PASSWORD')]) {
                     sh '''
-                        echo $DOCKER_PASSWORD | docker login -u <your-dockerhub-username> --password-stdin
-                        docker tag nodejs-app:latest shobitpandey18/nodejs-app:latest
-                        docker push shobitpandey18/nodejs-app:latest
+                        echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+                        docker tag nodejs-app:latest $shobitpandey18/nodejs-app:latest
+                        docker push $shobitpandey18/nodejs-app:latest
                     '''
                 }
             }
@@ -74,4 +73,3 @@ pipeline {
         }
     }
 }
-
