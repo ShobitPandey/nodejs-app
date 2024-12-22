@@ -4,7 +4,7 @@ pipeline {
 
     environment {
         // Ensure npm, Docker, and kubectl are accessible in the PATH
-        PATH = "/usr/local/bin:$PATH"  // Modify this path if needed for your setup
+        PATH = "/usr/local/bin:$PATH"  
     }
 
     stages {
