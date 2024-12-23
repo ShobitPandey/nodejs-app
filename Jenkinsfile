@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        // Ensure npm, Docker, and kubectl are accessible in the PATH
+    
         PATH = "/usr/local/bin:$PATH"
     }
 
@@ -10,6 +10,7 @@ pipeline {
         stage('Clone Repository') {
             steps {
                 // Clone the GitHub repository containing your app
+                echo "Cloning the repository..."
                 git url: 'https://github.com/ShobitPandey/nodejs-app.git', branch: 'main'
             }
         }
@@ -17,6 +18,7 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 // Install dependencies
+                echo "Installing dependencies..."
                 sh 'npm install'
             }
         }
@@ -24,6 +26,7 @@ pipeline {
         stage('Run Tests') {
             steps {
                 // Run tests
+                echo "Running tests..."
                 sh 'npm test'
             }
         }
@@ -31,6 +34,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 // Build the Docker image
+                echo "Building Docker image..."
                 sh 'docker build -t shobitpandey18/nodejs-app:latest .'
             }
         }
@@ -38,6 +42,7 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 // Log in to Docker Hub and push the image
+                echo "Pushing Docker image to Docker Hub..."
                 script {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                         sh '''
@@ -52,6 +57,7 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 // Deploy the app to Kubernetes
+                echo "Deploying the app to Kubernetes..."
                 sh '''
                     kubectl apply -f k8s/
                 '''
@@ -62,15 +68,37 @@ pipeline {
     post {
         success {
             echo "Deployment successful!"
-            mail to: 'pandeyshobit306@gmail.com',
-                 subject: "Deployment Success",
-                 body: "The application has been successfully deployed."
+            script {
+                def accountSid = 'AC8e9fa6ba00ed6e1991e1fc454f217008'
+                def authToken = 'ec4abce0395c49b71890aa577498fe7d'
+                def fromPhone = '+12184964707'
+                def toPhone = '+919634545641'
+
+                sh """
+                    curl -X POST https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json \
+                    --data-urlencode 'To=${toPhone}' \
+                    --data-urlencode 'From=${fromPhone}' \
+                    --data-urlencode 'Body=Deployment Successful!' \
+                    -u ${accountSid}:${authToken}
+                """
+            }
         }
         failure {
             echo "Deployment failed!"
-            mail to: 'pandeyshobit306@gmail.com',
-                 subject: "Deployment Failure",
-                 body: "The deployment failed. Please check the logs for more details."
+            script {
+                def accountSid = 'AC8e9fa6ba00ed6e1991e1fc454f217008'
+                def authToken = 'ec4abce0395c49b71890aa577498fe7d'
+                def fromPhone = '+12184964707'
+                def toPhone = '+919634545641'
+
+                sh """
+                    curl -X POST https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json \
+                    --data-urlencode 'To=${toPhone}' \
+                    --data-urlencode 'From=${fromPhone}' \
+                    --data-urlencode 'Body=Deployment Failed!' \
+                    -u ${accountSid}:${authToken}
+                """
+            }
         }
     }
 }
