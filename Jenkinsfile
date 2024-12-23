@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         // Ensure npm, Docker, and kubectl are accessible in the PATH
-        PATH = "/usr/local/bin:$PATH"  // Modify this path if needed for your setup
+        PATH = "/usr/local/bin:$PATH"
     }
 
     stages {
@@ -16,14 +16,14 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                // Ensure npm is available and install the dependencies
+                // Install dependencies
                 sh 'npm install'
             }
         }
 
         stage('Run Tests') {
             steps {
-                // Run the tests using npm
+                // Run tests
                 sh 'npm test'
             }
         }
@@ -31,48 +31,23 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 // Build the Docker image
-                sh 'docker build -t nodejs-app:latest .'
+                sh 'docker build -t shobitpandey18/nodejs-app:latest .'
             }
         }
 
-         stage('Log in to Docker Hub') {
+        stage('Push Docker Image') {
             steps {
+                // Log in to Docker Hub and push the image
                 script {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                        // Log in to Docker Hub using the credentials provided
-                        sh 'echo "Username: $DOCKER_USERNAME"'
-                        sh 'echo "Password: $DOCKER_PASSWORD"'
-                        // sh """
-                        //    echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
-                        // """
+                        sh '''
+                            echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+                            docker push shobitpandey18/nodejs-app:latest
+                        '''
                     }
                 }
             }
         }
-
-         stage('Push the to Docker Hub') {
-            steps {
-                script {
-                    // Push the built image to Docker Hub
-                    docker.image(DOCKER_IMAGE).push()
-                }
-            }
-        }
-    }
-
-
-        // stage('Push Docker Image') {
-        //     steps {
-        //         // Log in to DockerHub and push the image
-        //         withCredentials([string(credentialsId: 'dockerhub-password', variable: 'DOCKER_PASSWORD')]) {
-        //             sh '''
-        //                 echo $DOCKER_PASSWORD | docker login -u <your-dockerhub-username> --password-stdin
-        //                 docker tag nodejs-app:latest shobitpandey18/nodejs-app:latest
-        //                 docker push shobitpandey18/nodejs-app:latest
-        //             '''
-        //         }
-        //     }
-        // }
 
         stage('Deploy to Kubernetes') {
             steps {
