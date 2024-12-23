@@ -13,8 +13,10 @@ This repository demonstrates a **Simple CI/CD Pipeline** for a Node.js applicati
 5. Push Docker Image: Pushes the image to Docker Hub.
    - After the Docker image is built, it is pushed to Docker Hub
    - To push the image, you'd run a command like this:
-      docker tag my-app:latest myusername/my-app:latest
-      docker push myusername/my-app:latest
+     
+       docker tag my-app:latest myusername/my-app:latest
+     
+       docker push myusername/my-app:latest
 6. Deploy to Kubernetes: Deploys the app to a Kubernetes cluster.
    -  Deploy the app using Kubernetes configuration files
 7. Notifications: Sends SMS alerts (success/failure) via Twilio.
